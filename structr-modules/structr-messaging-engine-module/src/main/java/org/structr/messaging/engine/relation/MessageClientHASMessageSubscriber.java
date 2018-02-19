@@ -16,18 +16,33 @@
  * You should have received a copy of the GNU Affero General Public License
  * along with Structr.  If not, see <http://www.gnu.org/licenses/>.
  */
-package org.structr.mqtt;
+package org.structr.messaging.engine.relation;
 
-public interface MQTTInfo {
+import org.structr.core.entity.OneToMany;
+import org.structr.core.entity.Relation;
+import org.structr.messaging.engine.entities.MessageClient;
+import org.structr.messaging.engine.entities.MessageSubscriber;
 
-	public String getProtocol();
-	public String getUrl();
-	public int getPort();
-	public int getQoS();
-	public String getUuid();
+public class MessageClientHASMessageSubscriber extends OneToMany<MessageClient, MessageSubscriber>{
 
-	public String[] getTopics();
+    @Override
+    public Class<MessageClient> getSourceType() {
+        return MessageClient.class;
+    }
 
-	public void messageCallback(String topic, String message);
-	public void connectionStatusCallback(boolean connected);
+    @Override
+    public Class<MessageSubscriber> getTargetType() {
+        return MessageSubscriber.class;
+    }
+
+    @Override
+    public String name() {
+        return "HAS_SUBSCRIBER";
+    }
+
+    @Override
+    public int getCascadingDeleteFlag() {
+        return Relation.NONE;
+    }
+
 }
