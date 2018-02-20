@@ -16,20 +16,17 @@
  * You should have received a copy of the GNU Affero General Public License
  * along with Structr.  If not, see <http://www.gnu.org/licenses/>.
  */
-package org.structr.mqtt;
+package org.structr.messaging.engine.implementation.mqtt.function;
 
-import org.structr.common.error.FrameworkException;
+import org.structr.core.function.Functions;
 
-public interface MQTTInfo {
+public abstract class MQTTFunctions {
 
-	public String getProtocol();
-	public String getUrl();
-	public int getPort();
-	public int getQoS();
-	public String getUuid();
+	static {
+		//Licensed for Enterprise
+		Functions.put(true, 0x08, "mqtt_publish", new MQTTPublishFunction());
+		Functions.put(true, 0x08, "mqtt_subscribe", new MQTTSubscribeTopicFunction());
+		Functions.put(true, 0x08, "mqtt_unsubscribe", new MQTTUnsubscribeTopicFunction());
+	}
 
-	public String[] getTopics();
-
-	public void messageCallback(String topic, String message) throws FrameworkException;
-	public void connectionStatusCallback(boolean connected);
 }

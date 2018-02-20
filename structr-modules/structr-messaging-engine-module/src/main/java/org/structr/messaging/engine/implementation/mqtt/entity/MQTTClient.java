@@ -16,9 +16,8 @@
  * You should have received a copy of the GNU Affero General Public License
  * along with Structr.  If not, see <http://www.gnu.org/licenses/>.
  */
-package org.structr.mqtt.entity;
+package org.structr.messaging.engine.implementation.mqtt.entity;
 
-import org.apache.cxf.common.util.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.structr.common.PropertyView;
@@ -34,15 +33,13 @@ import org.structr.core.graph.Tx;
 import org.structr.core.property.*;
 import org.structr.messaging.engine.entities.MessageClient;
 import org.structr.messaging.engine.entities.MessageSubscriber;
-import org.structr.mqtt.MQTTClientConnection;
-import org.structr.mqtt.MQTTContext;
-import org.structr.mqtt.MQTTInfo;
+import org.structr.messaging.engine.implementation.mqtt.MQTTContext;
+import org.structr.messaging.engine.implementation.mqtt.MQTTClientConnection;
+import org.structr.messaging.engine.implementation.mqtt.MQTTInfo;
 import org.structr.rest.RestMethodResult;
 import org.structr.schema.SchemaService;
 
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 
 public class MQTTClient extends MessageClient implements MQTTInfo{
 
