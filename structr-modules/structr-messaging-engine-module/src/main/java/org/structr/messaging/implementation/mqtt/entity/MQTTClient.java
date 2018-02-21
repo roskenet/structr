@@ -16,7 +16,7 @@
  * You should have received a copy of the GNU Affero General Public License
  * along with Structr.  If not, see <http://www.gnu.org/licenses/>.
  */
-package org.structr.messaging.engine.implementation.mqtt.entity;
+package org.structr.messaging.implementation.mqtt.entity;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -33,9 +33,9 @@ import org.structr.core.graph.Tx;
 import org.structr.core.property.*;
 import org.structr.messaging.engine.entities.MessageClient;
 import org.structr.messaging.engine.entities.MessageSubscriber;
-import org.structr.messaging.engine.implementation.mqtt.MQTTContext;
-import org.structr.messaging.engine.implementation.mqtt.MQTTClientConnection;
-import org.structr.messaging.engine.implementation.mqtt.MQTTInfo;
+import org.structr.messaging.implementation.mqtt.MQTTContext;
+import org.structr.messaging.implementation.mqtt.MQTTClientConnection;
+import org.structr.messaging.implementation.mqtt.MQTTInfo;
 import org.structr.rest.RestMethodResult;
 import org.structr.schema.SchemaService;
 
@@ -224,14 +224,12 @@ public class MQTTClient extends MessageClient implements MQTTInfo{
 		if (getProperty(isEnabled)) {
 
 			final MQTTClientConnection connection = MQTTContext.getClientForId(getUuid());
-			if (connection.isConnected()) {
+			if (connection != null && connection.isConnected()) {
 
 				connection.subscribeTopic(topic);
 
-			} else {
-
-				throw new FrameworkException(422, "Not connected.");
 			}
+
 		}
 
 		return new RestMethodResult(200);
@@ -243,14 +241,12 @@ public class MQTTClient extends MessageClient implements MQTTInfo{
 		if (getProperty(isEnabled)) {
 
 			final MQTTClientConnection connection = MQTTContext.getClientForId(getUuid());
-			if (connection.isConnected()) {
+			if (connection != null && connection.isConnected()) {
 
 				connection.unsubscribeTopic(topic);
 
-			} else {
-
-				throw new FrameworkException(422, "Not connected.");
 			}
+
 		}
 
 		return new RestMethodResult(200);

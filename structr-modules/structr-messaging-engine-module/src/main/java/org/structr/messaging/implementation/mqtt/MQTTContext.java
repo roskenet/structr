@@ -16,7 +16,7 @@
  * You should have received a copy of the GNU Affero General Public License
  * along with Structr.  If not, see <http://www.gnu.org/licenses/>.
  */
-package org.structr.messaging.engine.implementation.mqtt;
+package org.structr.messaging.implementation.mqtt;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -31,7 +31,7 @@ import org.structr.core.app.App;
 import org.structr.core.app.StructrApp;
 import org.structr.core.graph.Tx;
 import org.structr.core.property.PropertyMap;
-import org.structr.messaging.engine.implementation.mqtt.entity.MQTTClient;
+import org.structr.messaging.implementation.mqtt.entity.MQTTClient;
 
 public abstract class MQTTContext {
 
