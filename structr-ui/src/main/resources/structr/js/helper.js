@@ -459,6 +459,7 @@ function fastRemoveAllChildren(el) {
  * static list of all logtypes
  */
 var _LogType = {
+	CODE:            "CODE",
 	CONTENTS:        "CONTENTS",
 	CRAWLER:         "CRAWLER",
 	CRUD:            "CRUD",
