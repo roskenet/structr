@@ -18,12 +18,20 @@
  */
 package org.structr.core.entity;
 
+import com.github.javaparser.JavaParser;
+import com.github.javaparser.ast.CompilationUnit;
+import com.github.javaparser.ast.ImportDeclaration;
+import com.github.javaparser.ast.body.BodyDeclaration;
+import com.github.javaparser.ast.body.FieldDeclaration;
+import com.github.javaparser.ast.body.MethodDeclaration;
+import com.github.javaparser.ast.body.TypeDeclaration;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.LinkedHashSet;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 import org.apache.commons.lang.StringUtils;
 import org.slf4j.Logger;
@@ -348,6 +356,41 @@ public class SchemaNode extends AbstractSchemaNode {
 	@Export
 	public String getGeneratedSourceCode() throws FrameworkException {
 		return SchemaHelper.getSource(this, new ErrorBuffer());
+	}
+
+	@Export
+	public void applySourceCode(final Map<String, Object> parameters) throws FrameworkException {
+
+		final String sourceCode               = (String)parameters.get("sourceCode");
+		final CompilationUnit cu              = JavaParser.parse(sourceCode);
+		final List<ImportDeclaration> imports = cu.getImports();
+		final List<TypeDeclaration<?>> types  = cu.getTypes();
+		final TypeDeclaration type            = types.get(0);
+
+		if (this.getName().equals(type.getName().asString())) {
+
+			final List<BodyDeclaration<?>> members = type.getMembers();
+
+			for (final BodyDeclaration d : members) {
+
+				if (d.isMethodDeclaration()) {
+
+					final MethodDeclaration method = d.asMethodDeclaration();
+
+					System.out.println(method.getBody());
+
+				} else if (d.isFieldDeclaration()) {
+
+					final FieldDeclaration field = d.asFieldDeclaration();
+
+					System.out.println(field.getVariables());
+				}
+			}
+
+		} else {
+
+			throw new FrameworkException(422, "Class name does not match, cannot apply source code.");
+		}
 	}
 
 	// ----- private methods -----

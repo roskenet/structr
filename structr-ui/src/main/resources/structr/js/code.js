@@ -161,6 +161,8 @@ var _Code = {
 					} else {
 						codeTree.jstree('open_node', data.node.id);
 						data.node.state.openend = true;
+
+						_Code.displayClassContents(data.node.id);
 					}
 				}
 
@@ -347,6 +349,18 @@ var _Code = {
 
 		_Code.editMethodContent(undefined, id, codeContents);
 	},
+	displayClassContents: function(id) {
+
+		if (id === '#' || id === 'root' || id === 'favorites' || id === 'globals') {
+			return;
+		}
+
+		fastRemoveAllChildren(codeContents[0]);
+
+		LSWrapper.setItem(codeLastOpenMethodKey, id);
+
+		_Code.editClassContent(undefined, id, codeContents);
+	},
 	fileOrFolderCreationNotification: function (newFileOrFolder) {
 		if ((currentWorkingDir === undefined || currentWorkingDir === null) && newFileOrFolder.parent === null) {
 			_Code.appendFileOrFolder(newFileOrFolder);
@@ -381,6 +395,14 @@ var _Code = {
 	},
 	updateCode: function(method, source) {
 		Command.setProperty(method.id, 'source', source);
+	},
+	applyChanges: function(schemaNode, source) {
+
+		$.ajax({
+			url: rootUrl + '/SchemaNode/' + schemaNode.id + '/applySourceCode',
+			type: 'post',
+			data: JSON.stringify({ sourceCode: source })
+		});
 	},
 	editMethodContent: function(button, id, element) {
 
@@ -475,26 +497,22 @@ var _Code = {
 				editor.refresh();
 
 				$(window).on('keydown', function(e) {
+
 					// This hack prevents FF from closing WS connections on ESC
 					if (e.keyCode === 27) {
 						e.preventDefault();
 					}
+
 					var k = e.which;
-					if (k === 16) {
-						shiftKey = true;
-					}
-					if (k === 18) {
-						altKey = true;
-					}
-					if (k === 17) {
-						ctrlKey = true;
-					}
-					if (k === 69) {
-						eKey = true;
-					}
+					if (k === 16) { shiftKey = true; }
+					if (k === 18) { altKey = true; }
+					if (k === 17) { ctrlKey = true; }
+					if (k === 69) { eKey = true; }
+
 					if (navigator.platform === 'MacIntel' && k === 91) {
 						cmdKey = true;
 					}
+
 					if ((e.ctrlKey && (e.which === 83)) || (navigator.platform === 'MacIntel' && cmdKey && (e.which === 83))) {
 						e.preventDefault();
 						if (codeSaveButton && !codeSaveButton.prop('disabled')) {
@@ -508,5 +526,129 @@ var _Code = {
 				console.log(xhr, statusText, error);
 			}
 		});
-	}
+	},
+	editClassContent: function(button, id, element) {
+
+		var url  = rootUrl + '/SchemaNode/' + id + '/getGeneratedSourceCode';
+		var text = '';
+
+		$.ajax({
+			url: url,
+			type: 'post',
+			success: function(result) {
+				var method = { id: id, source: result.result };
+				_Logger.log(_LogType.CODE, method.id, methodContents);
+				text = methodContents[method.id] || method.source;
+				if (Structr.isButtonDisabled(button)) {
+					return;
+				}
+				element.append('<div class="editor"></div><div id="template-preview"><textarea readonly></textarea></div>');
+				var contentBox = $('.editor', element);
+				var lineWrapping = LSWrapper.getItem(lineWrappingKey);
+				editor = CodeMirror(contentBox.get(0), {
+					value: text,
+					mode: 'text/x-java',
+					lineNumbers: true,
+					lineWrapping: lineWrapping,
+					indentUnit: 4,
+					tabSize:4,
+					indentWithTabs: true
+				});
+
+				var scrollInfo = JSON.parse(LSWrapper.getItem(scrollInfoKey + '_' + method.id));
+				if (scrollInfo) {
+					editor.scrollTo(scrollInfo.left, scrollInfo.top);
+				}
+
+				editor.on('scroll', function() {
+					var scrollInfo = editor.getScrollInfo();
+					LSWrapper.setItem(scrollInfoKey + '_' + method.id, JSON.stringify(scrollInfo));
+				});
+
+				editor.id = method.id;
+
+				var buttonArea = $('#code-button-container');
+				buttonArea.empty();
+				buttonArea.append('<button id="resetMethod" disabled="disabled" class="disabled"><i title="Add Method" class="' + _Icons.getFullSpriteClass(_Icons.cross_icon) + '" /> Cancel</button>');
+				buttonArea.append('<button id="saveMethod" disabled="disabled" class="disabled"><i title="Add Method" class="' + _Icons.getFullSpriteClass(_Icons.floppy_icon) + '" /> Save</button>');
+
+				var codeResetButton = $('#resetMethod', buttonArea);
+				var codeSaveButton  = $('#saveMethod', buttonArea);
+
+				editor.on('change', function(cm, change) {
+
+					if (text === editor.getValue()) {
+						codeSaveButton.prop("disabled", true).addClass('disabled');
+						codeResetButton.prop("disabled", true).addClass('disabled');
+					} else {
+						codeSaveButton.prop("disabled", false).removeClass('disabled');
+						codeResetButton.prop("disabled", false).removeClass('disabled');
+					}
+
+				});
+
+				codeResetButton.on('click', function(e) {
+
+					e.preventDefault();
+					e.stopPropagation();
+					_Code.displayMethodContents(method.id);
+					codeSaveButton.prop("disabled", true).addClass('disabled');
+					codeResetButton.prop("disabled", true).addClass('disabled');
+
+				});
+
+				codeSaveButton.on('click', function(e) {
+
+					e.preventDefault();
+					e.stopPropagation();
+					var newText = editor.getValue();
+					if (text === newText) {
+						return;
+					}
+					_Code.applyChanges(method, newText);
+					text = newText;
+					codeSaveButton.prop("disabled", true).addClass('disabled');
+					codeResetButton.prop("disabled", true).addClass('disabled');
+
+				});
+
+				_Code.resize();
+
+				if (method.isTemplate) {
+					_Code.updateTemplatePreview(element, url, dataType, contentType);
+				}
+
+				editor.refresh();
+
+				$(window).on('keydown', function(e) {
+
+					// This hack prevents FF from closing WS connections on ESC
+					if (e.keyCode === 27) {
+						e.preventDefault();
+					}
+
+					var k = e.which;
+					if (k === 16) { shiftKey = true; }
+					if (k === 18) { altKey = true; }
+					if (k === 17) { ctrlKey = true; }
+					if (k === 69) { eKey = true; }
+
+					if (navigator.platform === 'MacIntel' && k === 91) {
+						cmdKey = true;
+					}
+
+					if ((e.ctrlKey && (e.which === 83)) || (navigator.platform === 'MacIntel' && cmdKey && (e.which === 83))) {
+						e.preventDefault();
+						if (codeSaveButton && !codeSaveButton.prop('disabled')) {
+							codeSaveButton.click();
+						}
+					}
+				});
+
+			},
+			error: function(xhr, statusText, error) {
+				console.log(xhr, statusText, error);
+			}
+		});
+	},
 };
