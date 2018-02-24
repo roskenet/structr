@@ -22,6 +22,7 @@ import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import java.net.URI;
 import java.net.URISyntaxException;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -645,8 +646,27 @@ public class SchemaTest extends StructrTest {
 			fex.printStackTrace();
 			fail("Unexpected exception");
 		}
+	}
 
+	@Test
+	public void testParser() {
 
+		try (final Tx tx = app.tx()) {
+
+			final SchemaNode node                = app.nodeQuery(SchemaNode.class).andName("Principal").getFirst();
+			final String sourceCode              = node.getGeneratedSourceCode();
+			final Map<String, Object> parameters = new LinkedHashMap<>();
+
+			parameters.put("sourceCode", sourceCode);
+
+			node.applySourceCode(parameters);
+
+			tx.success();
+
+		} catch (Throwable fex) {
+			fex.printStackTrace();
+			fail("Unexpected exception");
+		}
 	}
 
 	// ----- private methods -----

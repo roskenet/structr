@@ -570,7 +570,7 @@ var _Code = {
 				var buttonArea = $('#code-button-container');
 				buttonArea.empty();
 				buttonArea.append('<button id="resetMethod" disabled="disabled" class="disabled"><i title="Add Method" class="' + _Icons.getFullSpriteClass(_Icons.cross_icon) + '" /> Cancel</button>');
-				buttonArea.append('<button id="saveMethod" disabled="disabled" class="disabled"><i title="Add Method" class="' + _Icons.getFullSpriteClass(_Icons.floppy_icon) + '" /> Save</button>');
+				buttonArea.append('<button id="saveMethod"><i title="Add Method" class="' + _Icons.getFullSpriteClass(_Icons.floppy_icon) + '" /> Save</button>');
 
 				var codeResetButton = $('#resetMethod', buttonArea);
 				var codeSaveButton  = $('#saveMethod', buttonArea);
@@ -578,10 +578,8 @@ var _Code = {
 				editor.on('change', function(cm, change) {
 
 					if (text === editor.getValue()) {
-						codeSaveButton.prop("disabled", true).addClass('disabled');
 						codeResetButton.prop("disabled", true).addClass('disabled');
 					} else {
-						codeSaveButton.prop("disabled", false).removeClass('disabled');
 						codeResetButton.prop("disabled", false).removeClass('disabled');
 					}
 
@@ -592,7 +590,6 @@ var _Code = {
 					e.preventDefault();
 					e.stopPropagation();
 					_Code.displayMethodContents(method.id);
-					codeSaveButton.prop("disabled", true).addClass('disabled');
 					codeResetButton.prop("disabled", true).addClass('disabled');
 
 				});
@@ -602,12 +599,8 @@ var _Code = {
 					e.preventDefault();
 					e.stopPropagation();
 					var newText = editor.getValue();
-					if (text === newText) {
-						return;
-					}
 					_Code.applyChanges(method, newText);
 					text = newText;
-					codeSaveButton.prop("disabled", true).addClass('disabled');
 					codeResetButton.prop("disabled", true).addClass('disabled');
 
 				});

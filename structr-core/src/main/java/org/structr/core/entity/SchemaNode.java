@@ -25,6 +25,11 @@ import com.github.javaparser.ast.body.BodyDeclaration;
 import com.github.javaparser.ast.body.FieldDeclaration;
 import com.github.javaparser.ast.body.MethodDeclaration;
 import com.github.javaparser.ast.body.TypeDeclaration;
+import com.github.javaparser.ast.body.VariableDeclarator;
+import com.github.javaparser.ast.expr.Expression;
+import com.github.javaparser.ast.expr.ObjectCreationExpr;
+import com.github.javaparser.ast.type.ClassOrInterfaceType;
+import com.github.javaparser.ast.type.Type;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.Comparator;
@@ -32,6 +37,7 @@ import java.util.LinkedHashSet;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import java.util.Set;
 import org.apache.commons.lang.StringUtils;
 import org.slf4j.Logger;
@@ -369,21 +375,18 @@ public class SchemaNode extends AbstractSchemaNode {
 
 		if (this.getName().equals(type.getName().asString())) {
 
-			final List<BodyDeclaration<?>> members = type.getMembers();
+			applyImports(imports);
 
+			final List<BodyDeclaration<?>> members = type.getMembers();
 			for (final BodyDeclaration d : members) {
 
 				if (d.isMethodDeclaration()) {
 
-					final MethodDeclaration method = d.asMethodDeclaration();
-
-					System.out.println(method.getBody());
+					applyMethodDeclaration(d.asMethodDeclaration());
 
 				} else if (d.isFieldDeclaration()) {
 
-					final FieldDeclaration field = d.asFieldDeclaration();
-
-					System.out.println(field.getVariables());
+					applyFieldDeclaration(d.asFieldDeclaration());
 				}
 			}
 
@@ -463,5 +466,74 @@ public class SchemaNode extends AbstractSchemaNode {
 			}
 			*/
 		}
+	}
+
+	private void applyImports(final List<ImportDeclaration> imports) throws FrameworkException {
+
+	}
+
+	private void applyMethodDeclaration(final MethodDeclaration method) throws FrameworkException {
+
+		final String name                   = method.getNameAsString();
+		final List<SchemaMethod> candidates = StructrApp.getInstance().nodeQuery(SchemaMethod.class).and(SchemaMethod.schemaNode, this).and(SchemaMethod.name, name).getAsList();
+
+		if (candidates.isEmpty()) {
+
+			logger.info("Detected new or renamed method {}", name);
+
+		} else {
+
+			logger.info("Detected {} candidates for method {}", candidates.size(), name);
+		}
+	}
+
+	private void applyFieldDeclaration(final FieldDeclaration field) throws FrameworkException {
+
+		final List<VariableDeclarator> variables = field.getVariables();
+
+		for (final VariableDeclarator var : variables) {
+
+			final String name              = var.getNameAsString();
+			final Type type                = var.getType();
+
+			if (type.isClassOrInterfaceType()) {
+
+				final ObjectCreationExpr expr  = getCreationExpression(var.getInitializer());
+				if (expr != null) {
+
+					final ClassOrInterfaceType cit = type.asClassOrInterfaceType();
+					final String typeName          = cit.getNameAsString();
+
+					logger.info("Detected field of type {} with name {}, creation of {}", typeName, name, expr.getType().getNameAsString());
+
+				}
+
+			}
+		}
+
+	}
+
+	private ObjectCreationExpr getCreationExpression(final Optional<Expression> optional) {
+
+		if (optional.isPresent()) {
+
+			final Expression expression = optional.get();
+
+			if (expression.isMethodCallExpr()) {
+
+				// recurse to remove trailing method calls of builder pattern
+				// (e.g. new StringProperty(..).indexed().dynamic().readOnly() etc.
+				return getCreationExpression(expression.asMethodCallExpr().getScope());
+			}
+
+			if (expression.isObjectCreationExpr()) {
+
+				return expression.asObjectCreationExpr();
+			}
+
+			System.out.println("Unhandled expression type " + expression.getClass().getName());
+		}
+
+		return null;
 	}
 }
