@@ -18,6 +18,7 @@
  */
 package org.structr.ldap;
 
+import org.apache.commons.lang.StringUtils;
 import org.apache.directory.api.ldap.model.entry.Attribute;
 import org.apache.directory.api.ldap.model.entry.Entry;
 import org.apache.directory.api.ldap.model.exception.LdapInvalidAttributeValueException;
@@ -37,28 +38,37 @@ import org.structr.web.entity.User;
 public class LDAPUser extends User {
 
 	private static final Logger logger = LoggerFactory.getLogger(LDAPUser.class);
-	
+
 	public static final Property<String> distinguishedName = new StringProperty("distinguishedName").unique().indexed();
 	public static final Property<String> description       = new StringProperty("description").indexed();
 	public static final Property<String> commonName        = new StringProperty("commonName").indexed();
-	public static final Property<String> entryUuid         = new StringProperty("entryUuid").unique().indexed();
 
 
 	public static final org.structr.common.View uiView = new org.structr.common.View(LDAPUser.class, PropertyView.Ui,
-		distinguishedName, entryUuid, commonName, description
+		distinguishedName, commonName, description
 	);
 
 	public static final org.structr.common.View publicView = new org.structr.common.View(LDAPUser.class, PropertyView.Public,
-		distinguishedName, entryUuid, commonName, description
+		distinguishedName, commonName, description
 	);
 
 	public void initializeFrom(final Entry entry) throws FrameworkException, LdapInvalidAttributeValueException {
 
+		String name = getString(entry, "uid");
+		if (StringUtils.isBlank(name)) {
+
+			name = getString(entry, "cn");
+
+			// fallback
+			if (StringUtils.isBlank(name)) {
+				name = "Unknown";
+			}
+		}
+
 		setProperty(LDAPUser.description, getString(entry, "description"));
-		setProperty(LDAPUser.entryUuid,   getString(entry, "entryUUID"));
-		setProperty(LDAPUser.name,        getString(entry, "uid"));
 		setProperty(LDAPUser.commonName,  getString(entry, "cn"));
 		setProperty(LDAPUser.eMail,       getString(entry, "mail"));
+		setProperty(LDAPUser.name,        name);
 	}
 
 	@Override
