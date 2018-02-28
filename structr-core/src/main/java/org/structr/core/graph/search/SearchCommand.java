@@ -110,9 +110,13 @@ public abstract class SearchCommand<S extends PropertyContainer, T extends Graph
 		boolean hasGraphSources      = false;
 		boolean hasSpatialSource     = false;
 
-		if (securityContext.getUser(false) == null) {
+		if (securityContext.getUser(false) == null && !isRelationshipSearch()) {
 
 			rootGroup.add(new PropertySearchAttribute(GraphObject.visibleToPublicUsers, true, Occurrence.REQUIRED, true));
+
+		} else if (securityContext.getUser(false) == null && isRelationshipSearch()) {
+
+			rootGroup.add(new RelationshipVisibilitySearchAttribute());
 
 		}
 
@@ -126,6 +130,7 @@ public abstract class SearchCommand<S extends PropertyContainer, T extends Graph
 		// At this point, all search attributes are ready
 		final List<SourceSearchAttribute> sources    = new ArrayList<>();
 		boolean hasEmptySearchFields                 = false;
+		boolean hasRelationshipVisibilitySearch      = false;
 		Result intermediateResult                    = null;
 
 		// check for optional-only queries
@@ -184,6 +189,10 @@ public abstract class SearchCommand<S extends PropertyContainer, T extends Graph
 			if (attr instanceof EmptySearchAttribute) {
 				hasEmptySearchFields = true;
 			}
+
+			if (attr instanceof RelationshipVisibilitySearchAttribute) {
+				hasRelationshipVisibilitySearch = true;
+			}
 		}
 
 		// only do "normal" query if no other sources are present
@@ -215,7 +224,7 @@ public abstract class SearchCommand<S extends PropertyContainer, T extends Graph
 			}
 		}
 
-		if (intermediateResult != null && (hasEmptySearchFields || hasGraphSources || hasSpatialSource)) {
+		if (intermediateResult != null && (hasEmptySearchFields || hasGraphSources || hasSpatialSource || hasRelationshipVisibilitySearch)) {
 
 			// sorted result set
 			final Set<GraphObject> intermediateResultSet = new LinkedHashSet<>(intermediateResult.getResults());
