@@ -117,6 +117,7 @@ public class IdDeserializationStrategy<S, T extends NodeInterface> extends Deser
 				} else {
 
 					final PropertyMap uniqueKeyValues  = new PropertyMap();
+					boolean typeHasCompoundIndexSet    = false;
 
 					for (final PropertyKey key : convertedProperties.keySet()) {
 
@@ -128,6 +129,23 @@ public class IdDeserializationStrategy<S, T extends NodeInterface> extends Deser
 
 							// store "foreign" properties (those that are to be set on the newly created relationship
 							foreignProps.put(key.jsonName(), properties.get(key.jsonName()));
+						}
+
+						typeHasCompoundIndexSet |= key.isCompound();
+					}
+
+					// If a compound index is defined, all properties that belong to the compound index
+					// must be used in uniqueKeyValues, even if they are not present in the input set.
+					// We need to find the keys and add null values for those keys in order for the
+					// below code to work if the input set is incomplete.
+					if (typeHasCompoundIndexSet) {
+
+						for (final PropertyKey key : allProperties) {
+
+							if (key.isCompound() && !uniqueKeyValues.containsKey(key)) {
+
+								uniqueKeyValues.put(key, null);
+							}
 						}
 					}
 
@@ -155,7 +173,9 @@ public class IdDeserializationStrategy<S, T extends NodeInterface> extends Deser
 									type.getSimpleName(),
 									", ambiguous result: found ",
 									num,
-									" nodes for the given property set."
+									" nodes for the given property set ",
+									uniqueKeyValues.toString(),
+									"."
 								));
 						}
 

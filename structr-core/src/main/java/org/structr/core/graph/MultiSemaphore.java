@@ -40,6 +40,7 @@ public class MultiSemaphore {
 		if (types != null && !types.isEmpty()) {
 
 			for (Semaphore semaphore : getSemaphores(types)) {
+
 				semaphore.acquire();
 			}
 		}
@@ -68,7 +69,7 @@ public class MultiSemaphore {
 					Semaphore semaphore = semaphoreMap.get(type);
 					if (semaphore == null) {
 
-						semaphore = new Semaphore(1, true);
+						semaphore = new Semaphore(1);
 						semaphoreMap.put(type, semaphore);
 					}
 

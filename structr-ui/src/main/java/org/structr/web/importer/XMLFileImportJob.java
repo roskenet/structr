@@ -115,22 +115,26 @@ public class XMLFileImportJob extends FileImportJob {
 
 						int count = 0;
 
-						// test: open transaction
-						Tx tx = app.tx();
-
 						// make transaction available in context
-						threadContext.setAttribute("currentTransaction", tx);
+						threadContext.setAttribute("currentTransaction", app.tx());
 
-						while (iterator.hasNext() && ++count <= batchSize) {
+						try {
 
-							app.create(AbstractNode.class, PropertyMap.inputTypeToJavaType(threadContext, iterator.next()));
-							overallCount++;
+							while (iterator.hasNext() && ++count <= batchSize) {
+
+								app.create(AbstractNode.class, PropertyMap.inputTypeToJavaType(threadContext, iterator.next()));
+								overallCount++;
+							}
+
+							final Tx tx = (Tx)threadContext.getAttribute("currentTransaction");
+							tx.success();
+
+						} finally {
+
+							// tx might have changed, reload from context
+							final Tx tx = (Tx)threadContext.getAttribute("currentTransaction");
+							tx.close();
 						}
-
-						// tx might have changed, reload from context
-						tx = (Tx)threadContext.getAttribute("currentTransaction");
-						tx.success();
-						tx.close();
 
 						chunks++;
 
