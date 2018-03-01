@@ -158,6 +158,7 @@ public class DOMElement extends DOMNode implements Element, NamedNodeMap, NonInd
 	public static final Property<String> _optionsKey = new StringProperty("data-structr-options-key").category(EDIT_MODE_BINDING_CATEGORY).hint("Key used to display option labels for collection properties (default: name)");
 	public static final Property<String> _editClass = new StringProperty("data-structr-edit-class").category(EDIT_MODE_BINDING_CATEGORY).hint("Custom CSS class in edit mode");
 	public static final Property<String> _returnURI = new StringProperty("data-structr-return").category(EDIT_MODE_BINDING_CATEGORY).hint("Return URI after successful action");
+	public static final Property<String> _format = new StringProperty("data-structr-format").category(EDIT_MODE_BINDING_CATEGORY).hint("Custom format for Date or Enum properties. (Example: Date: dd.MM.yyyy - Enum: Value1,Value2,Value3)");
 
 	// Core attributes
 	public static final Property<String> _accesskey = new HtmlProperty("accesskey").indexed();
