@@ -76,6 +76,7 @@ public class SecurityContext {
 	private String cachedUserName                = null;
 	private String cachedUserId                  = null;
 	private String sessionId                     = null;
+	private ContextStore contextStore            = null;
 
 	//~--- constructors ---------------------------------------------------
 	private SecurityContext() {
@@ -836,6 +837,14 @@ public class SecurityContext {
 
 	public int getSerializationDepth() {
 		return serializationDepth;
+	}
+
+	public ContextStore getContextStore() {
+		return contextStore;
+	}
+
+	public void setContextStore(ContextStore contextStore) {
+		this.contextStore = contextStore;
 	}
 
 	// ----- nested classes -----
