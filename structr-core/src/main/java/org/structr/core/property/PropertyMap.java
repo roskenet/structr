@@ -360,8 +360,6 @@ public class PropertyMap {
 			}
 		}
 
-		logger.info("count: {}", securityContext.getAttribute("overallCount", 0));
-
 		PropertyMap resultMap = new PropertyMap();
 		if (source != null) {
 
