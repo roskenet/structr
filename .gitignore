@@ -31,3 +31,7 @@ docs/screenshots
 **nbactions.xml
 import-*.log
 license.key
+
+# IntelliJ specific ignores
+.idea
+*.iml
