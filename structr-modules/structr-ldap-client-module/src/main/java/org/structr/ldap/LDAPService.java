@@ -23,12 +23,8 @@ import java.util.concurrent.TimeUnit;
 import org.apache.commons.lang.StringUtils;
 import org.apache.directory.api.ldap.model.cursor.CursorException;
 import org.apache.directory.api.ldap.model.cursor.EntryCursor;
-import org.apache.directory.api.ldap.model.entry.DefaultModification;
 import org.apache.directory.api.ldap.model.entry.Entry;
-import org.apache.directory.api.ldap.model.entry.Modification;
-import org.apache.directory.api.ldap.model.entry.ModificationOperation;
 import org.apache.directory.api.ldap.model.exception.LdapException;
-import org.apache.directory.api.ldap.model.exception.LdapInvalidAttributeValueException;
 import org.apache.directory.api.ldap.model.message.SearchScope;
 import org.apache.directory.api.ldap.model.name.Dn;
 import org.apache.directory.ldap.client.api.LdapConnection;
@@ -115,8 +111,8 @@ public class LDAPService extends Thread implements RunnableService {
 
 				connection.close();
 
-			} catch (CursorException | LdapException | IOException ex) {
-				logger.warn("", ex);
+			} catch (Throwable t) {
+				t.printStackTrace();
 			}
 		}
 
@@ -139,8 +135,8 @@ public class LDAPService extends Thread implements RunnableService {
 
 				return true;
 
-			} catch (LdapException | IOException ex) {
-				logger.warn("", ex);
+			} catch (Throwable t) {
+				t.printStackTrace();
 			}
 		}
 
@@ -161,6 +157,9 @@ public class LDAPService extends Thread implements RunnableService {
 
 				logger.info("Updating user/group information from LDAP server {}:{}..", new Object[]{host, port});
 
+				// wait for the connection to be fully available...
+				try { Thread.sleep(1000); } catch (InterruptedException ex) {}
+
 				if (StringUtils.isNotBlank(binddn) && StringUtils.isNotBlank(secret)) {
 
 					connection.bind(binddn, secret);
@@ -175,7 +174,7 @@ public class LDAPService extends Thread implements RunnableService {
 				while (cursor.next()) {
 
 					final Entry entry = cursor.get();
-					synchronizeUserEntry(connection, entry);
+					synchronizeUserEntry(entry);
 				}
 
 				// step 2: examine local users and refresh / remove
@@ -218,7 +217,7 @@ public class LDAPService extends Thread implements RunnableService {
 	}
 
 	// ----- private methods -----
-	private String synchronizeUserEntry(final LdapConnection connection, final Entry entry) {
+	private String synchronizeUserEntry(final Entry entry) {
 
 		final App app         = StructrApp.getInstance();
 		final Dn dn           = entry.getDn();
@@ -231,27 +230,15 @@ public class LDAPService extends Thread implements RunnableService {
 
 				user = app.create(LDAPUser.class, new NodeAttribute(LDAPUser.distinguishedName, dnString));
 				user.initializeFrom(entry);
-
-				final String uuid = user.getUuid();
-				if (user.getProperty(LDAPUser.entryUuid) == null) {
-
-					try {
-						// try to set "our" UUID in the remote database
-						final Modification addUuid = new DefaultModification(ModificationOperation.ADD_ATTRIBUTE, "entryUUID", normalizeUUID(uuid));
-						connection.modify(dn, addUuid);
-
-					} catch (LdapException ex) {
-						logger.warn("Unable to set entryUUID: {}", ex.getMessage());
-					}
-				}
 			}
 
 			tx.success();
 
 			return user.getUuid();
 
-		} catch (FrameworkException | LdapInvalidAttributeValueException fex) {
-			logger.warn("Unable to update LDAP information", fex);
+		} catch (Throwable t) {
+			t.printStackTrace();
+			logger.warn("Unable to update LDAP information: {}", t.getMessage());
 		}
 
 		return null;
@@ -282,7 +269,8 @@ public class LDAPService extends Thread implements RunnableService {
 			}
 
 			// sleep until next update
-			try { Thread.sleep(updateInterval); } catch (InterruptedException itex) { }
+			//try { Thread.sleep(updateInterval); } catch (InterruptedException itex) { }
+			try { Thread.sleep(60000); } catch (InterruptedException itex) { }
 		}
 	}
 
@@ -316,15 +304,15 @@ public class LDAPService extends Thread implements RunnableService {
 	@Override
 	public boolean initialize(final StructrServices services) throws ClassNotFoundException, InstantiationException, IllegalAccessException {
 
-		this.updateInterval = Settings.getOrCreateIntegerSetting(CONFIG_KEY_UPDATE_INTERVAL, Long.toString(TimeUnit.HOURS.toMillis(2))).getValue();
+		this.updateInterval = Settings.getOrCreateIntegerSetting(CONFIG_KEY_UPDATE_INTERVAL).getValue(Long.valueOf(TimeUnit.HOURS.toMillis(2)).intValue());
 
 		this.binddn         = Settings.getOrCreateStringSetting(CONFIG_KEY_LDAP_BINDDN).getValue();
 		this.secret         = Settings.getOrCreateStringSetting(CONFIG_KEY_LDAP_SECRET).getValue();
 
-		this.host           = Settings.getOrCreateStringSetting(CONFIG_KEY_LDAP_HOST, "localhost").getValue();
-		this.baseDn         = Settings.getOrCreateStringSetting(CONFIG_KEY_LDAP_BASEDN, "ou=system").getValue();
-		this.filter         = Settings.getOrCreateStringSetting(CONFIG_KEY_LDAP_FILTER, "(objectclass=*)").getValue();
-		this.scope          = Settings.getOrCreateStringSetting(CONFIG_KEY_LDAP_SCOPE, "SUBTREE").getValue();
+		this.host           = Settings.getOrCreateStringSetting(CONFIG_KEY_LDAP_HOST).getValue("localhost");
+		this.baseDn         = Settings.getOrCreateStringSetting(CONFIG_KEY_LDAP_BASEDN).getValue("ou=system");
+		this.filter         = Settings.getOrCreateStringSetting(CONFIG_KEY_LDAP_FILTER).getValue("(objectclass=*)");
+		this.scope          = Settings.getOrCreateStringSetting(CONFIG_KEY_LDAP_SCOPE).getValue("SUBTREE");
 
 		this.port           = Settings.getOrCreateIntegerSetting(CONFIG_KEY_LDAP_PORT).getValue(339);
 		this.useSsl         = Settings.getBooleanSetting(CONFIG_KEY_LDAP_SSL).getValue(true);

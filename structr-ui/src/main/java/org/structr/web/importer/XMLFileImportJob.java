@@ -95,6 +95,7 @@ public class XMLFileImportJob extends FileImportJob {
 
 			// experimental: instruct deserialization strategies to set properties on related nodes
 			threadContext.setAttribute("setNestedProperties", true);
+			threadContext.setAttribute("batchType", configuration.get("batchType"));
 
 			try (final InputStream is = getFileInputStream(threadContext)) {
 
@@ -114,22 +115,30 @@ public class XMLFileImportJob extends FileImportJob {
 
 						int count = 0;
 
-						try (final Tx tx = app.tx()) {
+						// make transaction available in context
+						threadContext.setAttribute("currentTransaction", app.tx());
+
+						try {
 
 							while (iterator.hasNext() && ++count <= batchSize) {
 
 								app.create(AbstractNode.class, PropertyMap.inputTypeToJavaType(threadContext, iterator.next()));
-
 								overallCount++;
 							}
 
+							final Tx tx = (Tx)threadContext.getAttribute("currentTransaction");
 							tx.success();
 
-							chunks++;
+						} finally {
 
-							chunkFinished(chunkStartTime, chunks, batchSize, overallCount);
-
+							// tx might have changed, reload from context
+							final Tx tx = (Tx)threadContext.getAttribute("currentTransaction");
+							tx.close();
 						}
+
+						chunks++;
+
+						chunkFinished(chunkStartTime, chunks, batchSize, overallCount);
 
 						// do this outside of the transaction!
 						shouldPause();

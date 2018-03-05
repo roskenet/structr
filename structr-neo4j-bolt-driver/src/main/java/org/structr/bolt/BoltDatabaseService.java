@@ -31,6 +31,7 @@ import java.util.Map;
 import java.util.Properties;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
+import org.apache.commons.lang.StringUtils;
 import org.neo4j.driver.v1.AuthTokens;
 import org.neo4j.driver.v1.Config;
 import org.neo4j.driver.v1.Driver;
@@ -93,6 +94,10 @@ public class BoltDatabaseService implements DatabaseService, GraphProperties {
 
 		this.databasePath = Settings.DatabasePath.getValue();
 		this.tenantId     = Settings.TenantIdentifier.getValue();
+
+		if (StringUtils.isBlank(this.tenantId)) {
+			this.tenantId = null;
+		}
 
 		final BoltConnector bolt = new BoltConnector("0");
 		databaseUrl              = Settings.ConnectionUrl.getValue();
