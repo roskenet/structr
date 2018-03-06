@@ -205,7 +205,7 @@ public class MQTTClient extends MessageClient implements MQTTInfo{
 		if (getProperty(isEnabled)) {
 
 			final MQTTClientConnection connection = MQTTContext.getClientForId(getUuid());
-			if (connection.isConnected()) {
+			if (connection != null && connection.isConnected()) {
 
 				connection.sendMessage(topic, message);
 
@@ -220,7 +220,7 @@ public class MQTTClient extends MessageClient implements MQTTInfo{
 
 	@Export
 	public RestMethodResult subscribeTopic(final String topic) throws FrameworkException {
-		
+
 		if (getProperty(isEnabled)) {
 
 			final MQTTClientConnection connection = MQTTContext.getClientForId(getUuid());
