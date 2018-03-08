@@ -40,6 +40,7 @@ import org.structr.common.error.FrameworkException;
 import org.structr.core.GraphObject;
 import org.structr.core.GraphObjectMap;
 import org.structr.core.Result;
+import org.structr.core.app.StructrApp;
 import org.structr.core.entity.AbstractNode;
 import org.structr.core.property.EndNodes;
 import org.structr.core.property.IntProperty;
@@ -79,7 +80,7 @@ public class VirtualType extends AbstractNode implements ResultTransformer {
 	public Result transformOutput(final SecurityContext securityContext, final Class sourceType, final Result result) throws FrameworkException {
 
 		final List<VirtualProperty> props         = sort(getProperty(properties));
-		final Mapper mapper                       = new Mapper(securityContext, props, entityType);
+		final Mapper mapper                       = new Mapper(securityContext, props, StructrApp.getConfiguration().getNodeEntityClass(getSourceType()));
 		final Filter filter                       = new Filter(securityContext, getProperty(filterExpression));
 		final Iterable<GraphObject> iterable      = Iterables.map(mapper, Iterables.filter(filter, result.getResults()));
 		final List<GraphObject> transformedResult = Iterables.toList(iterable);
