@@ -39,7 +39,8 @@ import org.structr.web.entity.Folder;
 
 public class CreateArchiveFunction extends UiFunction {
 
-	public static final String ERROR_MESSAGE_COMPLEMENT = "Usage: ${createArchive(archiveFileName, files [, CustomFileType])}. Example: ${createArchive(\"archive\", find(\"File\"))}";
+	public static final String ERROR_MESSAGE_CREATE_ARCHIVE    = "Usage: ${create_archive(archiveFileName, files [, CustomFileType])}. Example: ${create_archive(\"archive\", find(\"File\"))}";
+	public static final String ERROR_MESSAGE_CREATE_ARCHIVE_JS = "Usage: ${{Structr.createArchive(archiveFileName, files [, CustomFileType])}}. Example: ${{Structr.createArchive(\"archive\", Structr.find(\"File\"))}}";
 
 	@Override
 	public String getName() {
@@ -134,15 +135,13 @@ public class CreateArchiveFunction extends UiFunction {
 	@Override
 	public String usage(boolean inJavaScriptContext) {
 
-		return ERROR_MESSAGE_COMPLEMENT;
-
+		return (inJavaScriptContext ? ERROR_MESSAGE_CREATE_ARCHIVE_JS : ERROR_MESSAGE_CREATE_ARCHIVE);
 	}
 
 	@Override
 	public String shortDescription() {
 
 		return "Packs the given files and folders into zipped archive.";
-
 	}
 
 	private void addFileToZipArchive(String path, FileBase file, ArchiveOutputStream aps) throws IOException {
