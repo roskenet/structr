@@ -28,6 +28,7 @@ import java.io.PrintWriter;
 import java.io.UnsupportedEncodingException;
 import java.nio.charset.Charset;
 import java.security.Principal;
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Enumeration;
 import java.util.LinkedList;
@@ -59,7 +60,11 @@ import static org.junit.Assert.assertEquals;
 import org.junit.Test;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.structr.common.AccessMode;
+import org.structr.common.SecurityContext;
 import org.structr.common.error.FrameworkException;
+import org.structr.core.app.App;
+import org.structr.core.app.StructrApp;
 import org.structr.core.entity.AbstractNode;
 import org.structr.core.entity.SchemaNode;
 import org.structr.core.graph.NodeAttribute;
@@ -67,6 +72,7 @@ import org.structr.core.graph.NodeInterface;
 import org.structr.core.graph.Tx;
 import org.structr.core.property.PropertyMap;
 import org.structr.core.property.StringProperty;
+import org.structr.core.script.Scripting;
 import org.structr.schema.export.StructrSchema;
 import org.structr.schema.json.JsonSchema;
 import org.structr.web.StructrUiTest;
@@ -624,6 +630,74 @@ public class UiScriptingTest extends StructrUiTest {
 			.when()
 			.post("/Test/" + uuid + "/doTest");
 
+	}
+
+	@Test
+	public void testDoPrivileged() {
+
+		User tester = null;
+
+		try (final Tx tx = app.tx()) {
+
+			// create admin user
+			createTestNode(User.class,
+				new NodeAttribute<>(User.name, "admin"),
+				new NodeAttribute<>(User.password, "admin"),
+				new NodeAttribute<>(User.isAdmin, true)
+			);
+
+			// create admin user
+			tester = createTestNode(User.class,
+				new NodeAttribute<>(User.name, "tester"),
+				new NodeAttribute<>(User.password, "test")
+			);
+
+			tx.success();
+
+		} catch (FrameworkException fex) {
+
+			fex.printStackTrace();
+			fail("Unexpected exception.");
+		}
+
+		final String script1              =  "${{ return Structr.find('User', 'name', 'admin'); }}\n";
+		final String script2              =  "${{ return Structr.doPrivileged(function() { return Structr.find('User', 'name', 'admin'); }); }}\n";
+		final SecurityContext userContext = SecurityContext.getInstance(tester, AccessMode.Backend);
+		final App app                     = StructrApp.getInstance(userContext);
+		final RenderContext renderContext = new RenderContext(userContext, new RequestMockUp(), new ResponseMockUp(), RenderContext.EditMode.NONE);
+
+		try (final Tx tx = app.tx()) {
+
+			// unprivileged call
+			final Object result = Scripting.evaluate(renderContext, null, script1, "test");
+
+			assertEquals("Result is of invalid type",                   ArrayList.class, result.getClass());
+			assertEquals("Script in user context should not see admin", 0, ((List)result).size());
+
+
+			tx.success();
+
+		} catch (FrameworkException fex) {
+
+			fex.printStackTrace();
+			fail("Unexpected exception.");
+		}
+
+		try (final Tx tx = app.tx()) {
+
+			// doPrivileged call
+			final Object result = Scripting.evaluate(renderContext, null, script2, "test");
+
+			assertEquals("Result is of invalid type",              ArrayList.class, result.getClass());
+			assertEquals("Privileged script should not see admin", 1, ((List)result).size());
+
+			tx.success();
+
+		} catch (FrameworkException fex) {
+
+			fex.printStackTrace();
+			fail("Unexpected exception.");
+		}
 	}
 
 	// ----- private methods -----
