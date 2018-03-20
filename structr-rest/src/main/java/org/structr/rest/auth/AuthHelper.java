@@ -57,11 +57,17 @@ public class AuthHelper {
 	 */
 	public static <T> Principal getPrincipalForCredential(final PropertyKey<T> key, final T value) {
 
+		return getPrincipalForCredential(key, value, false);
+
+	}
+
+	public static <T> Principal getPrincipalForCredential(final PropertyKey<T> key, final T value, final boolean isPing) {
+
 		if (value != null) {
 
 			try {
 
-				return StructrApp.getInstance().nodeQuery(Principal.class).and(key, value).disableSorting().getFirst();
+				return StructrApp.getInstance().nodeQuery(Principal.class).and(key, value).disableSorting().isPing(isPing).getFirst();
 
 			} catch (FrameworkException fex) {
 
@@ -175,7 +181,13 @@ public class AuthHelper {
 	 */
 	public static Principal getPrincipalForSessionId(final String sessionId) {
 
-		return getPrincipalForCredential(Principal.sessionIds, new String[]{ sessionId });
+		return getPrincipalForSessionId(sessionId, false);
+
+	}
+
+	public static Principal getPrincipalForSessionId(final String sessionId, final boolean isPing) {
+
+		return getPrincipalForCredential(Principal.sessionIds, new String[]{ sessionId }, isPing);
 
 	}
 

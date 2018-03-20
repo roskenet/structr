@@ -142,8 +142,8 @@ public class StructrWebSocket implements WebSocketListener {
 		if (!Services.getInstance().isInitialized()) {
 			// send 401 Authentication Required
 			send(MessageBuilder.status().code(503).message("System is not initialized yet").build(), true);
-		}		
-		
+		}
+
 		final Services servicesInstance = Services.getInstance();
 
 		// wait for service layer to be initialized
@@ -175,7 +175,7 @@ public class StructrWebSocket implements WebSocketListener {
 				if (sessionIdFromMessage != null) {
 
 					// try to authenticated this connection by sessionId
-					authenticate(SessionHelper.getShortSessionId(sessionIdFromMessage));
+					authenticate(SessionHelper.getShortSessionId(sessionIdFromMessage), command.equals("PING"));
 				}
 
 				// we only permit LOGIN commands if authentication based on sessionId was not successful
@@ -423,9 +423,9 @@ public class StructrWebSocket implements WebSocketListener {
 
 	}
 
-	private void authenticate(final String sessionId) {
+	private void authenticate(final String sessionId, final boolean isPing) {
 
-		final Principal user = AuthHelper.getPrincipalForSessionId(sessionId);
+		final Principal user = AuthHelper.getPrincipalForSessionId(sessionId, isPing);
 
 		if (user != null) {
 
@@ -434,10 +434,10 @@ public class StructrWebSocket implements WebSocketListener {
 				final boolean sessionValid = !SessionHelper.isSessionTimedOut(SessionHelper.getSessionBySessionId(sessionId));
 
 				if (sessionValid) {
-					
+
 					logger.debug("Valid session: " + sessionId);
 					setAuthenticated(sessionId, user);
-					
+
 				} else {
 
 					logger.warn("Session {} timed out - last accessed by {} ({})", sessionId, user.getName(), user.getUuid());
@@ -564,9 +564,9 @@ public class StructrWebSocket implements WebSocketListener {
 	public void setAuthenticated(final String sessionId, final Principal user) {
 		securityContext = SecurityContext.getInstance(user, AccessMode.Backend);
 		securityContext.setSessionId(sessionId);
-		
+
 		logger.debug("Session ID of security context " + securityContext + " set to " + sessionId);
-		
+
 		timedOut = false;
 	}
 
