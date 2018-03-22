@@ -378,7 +378,9 @@ public class ActionContext {
 					final List<JavaScriptSource> jsFiles = app.nodeQuery(JavaScriptSource.class).and(JavaScriptSource.name, fileName).and(JavaScriptSource.useAsJavascriptLibrary, true).getAsList();
 
 					if (jsFiles.isEmpty()) {
-						logger.warn("No JavaScript library found with fileName: {}", fileName );
+						logger.warn("No JavaScript library file found with fileName: {}", fileName );
+					} else if (jsFiles.size() > 1) {
+						logger.warn("Multiple JavaScript library files found with fileName: {}. This may cause problems!", fileName );
 					}
 
 					for (final JavaScriptSource jsLibraryFile : jsFiles) {
