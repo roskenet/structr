@@ -167,7 +167,7 @@
 			<groupId>net.openhft</groupId>
 			<artifactId>zero-allocation-hashing</artifactId>
 			<version>0.8</version>
-		</dependency>		
+		</dependency>
 	</dependencies>
 	<build>
 		<resources>
@@ -194,7 +194,7 @@
 				<artifactId>maven-surefire-plugin</artifactId>
 				<version>2.19.1</version>
 				<configuration>
-					<argLine>-Xmx1g -Duser.timezone=UTC -Djava.system.class.loader=org.structr.StructrClassLoader</argLine>
+					<argLine>-Xmx4g -Duser.timezone=UTC -Djava.system.class.loader=org.structr.StructrClassLoader</argLine>
 					<reuseForks>false</reuseForks>
 					<forkCount>1</forkCount>
 				</configuration>
