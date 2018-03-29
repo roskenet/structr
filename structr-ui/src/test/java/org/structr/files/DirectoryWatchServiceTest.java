@@ -221,7 +221,9 @@ public class DirectoryWatchServiceTest extends StructrUiTest {
 
 				app.create(Folder.class,
 					new NodeAttribute<>(Folder.name, "mounted3"),
-					new NodeAttribute<>(Folder.mountTarget, root.toString())
+					new NodeAttribute<>(Folder.mountTarget, root.toString()),
+					new NodeAttribute<>(Folder.mountWatchContents, true),
+					new NodeAttribute<>(Folder.mountScanInterval, 2)
 				);
 
 				tx.success();
@@ -257,7 +259,7 @@ public class DirectoryWatchServiceTest extends StructrUiTest {
 			writeFile(file2, "test2 - AFTER change");
 
 			// wait some time
-			try { Thread.sleep(1000); } catch (InterruptedException ignore) {}
+			try { Thread.sleep(4000); } catch (InterruptedException ignore) {}
 
 			// check that external changes are present in the file
 			try (final Tx tx = app.tx()) {
