@@ -29,6 +29,7 @@ import java.io.InputStreamReader;
 import java.io.OutputStream;
 import java.io.Reader;
 import java.nio.charset.Charset;
+import java.nio.charset.IllegalCharsetNameException;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
@@ -77,6 +78,7 @@ import org.structr.core.property.Property;
 import org.structr.core.property.PropertyMap;
 import org.structr.core.property.StartNodes;
 import org.structr.core.property.StringProperty;
+import org.structr.core.scheduler.JobQueueManager;
 import org.structr.core.script.Scripting;
 import org.structr.files.cmis.config.StructrFileActions;
 import org.structr.rest.common.XMLStructureAnalyzer;
@@ -90,7 +92,6 @@ import org.structr.web.entity.relation.Folders;
 import org.structr.web.entity.relation.MinificationSource;
 import org.structr.web.entity.relation.UserFavoriteFile;
 import org.structr.web.importer.CSVFileImportJob;
-import org.structr.core.scheduler.JobQueueManager;
 import org.structr.web.importer.XMLFileImportJob;
 import org.structr.web.property.FileDataProperty;
 
@@ -367,7 +368,23 @@ public class FileBase extends AbstractFile implements Indexable, Linkable, JavaS
 					try {
 
 						final String result = Scripting.replaceVariables(new ActionContext(securityContext), this, content);
-						return IOUtils.toInputStream(result, "UTF-8");
+
+						String encoding = "UTF-8";
+
+						final String cType = getContentType();
+						if (cType != null) {
+
+							final String charset = StringUtils.substringAfterLast(cType, "charset=").trim().toUpperCase();
+							try {
+								if (!"".equals(charset) && Charset.isSupported(charset)) {
+									encoding = charset;
+								}
+							} catch (IllegalCharsetNameException ice) {
+								logger.warn("Charset is not supported '{}'. Using 'UTF-8'", charset);
+							}
+						}
+
+						return IOUtils.toInputStream(result, encoding);
 
 					} catch (Throwable t) {
 
