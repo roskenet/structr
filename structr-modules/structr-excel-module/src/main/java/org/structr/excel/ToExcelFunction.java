@@ -234,7 +234,7 @@ public class ToExcelFunction extends Function<Object, Object> {
 					final GraphObject castedObj = (GraphObject)obj;
 
 					for (final String colName : properties) {
-						final PropertyKey key = StructrApp.key(obj.getClass(), colName);
+						final PropertyKey key = StructrApp.getConfiguration().getPropertyKeyForJSONName(obj.getClass(), colName);
 						final Object value = castedObj.getProperty(key);
 						cell = (XSSFCell)currentRow.createCell(cellCount++);
 						cell.setCellValue(escapeForExcel(value));
