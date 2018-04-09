@@ -738,6 +738,11 @@ public class Importer {
 
 						component = app.nodeQuery(DOMNode.class).and(GraphObject.id, src).getFirst();
 
+					} else if (DeployCommand.endsWithUuid(src)) {
+
+						final String uuid = src.substring(src.length() - 32);
+						component = app.nodeQuery(DOMNode.class).and(GraphObject.id, uuid).getFirst();
+
 					} else {
 
 						component = Importer.findSharedComponentByName(src);

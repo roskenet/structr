@@ -905,7 +905,12 @@ public class DeployCommand extends NodeServiceCommand implements MaintenanceComm
 					if (content != null) {
 
 						String name = node.getProperty(AbstractNode.name);
-						if (name == null) {
+
+						if (name != null) {
+
+							name += "-" + node.getUuid();
+
+						} else {
 
 							name = node.getUuid();
 						}

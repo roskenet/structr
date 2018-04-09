@@ -263,10 +263,11 @@ public class DOMElement extends DOMNode implements Element, NamedNodeMap, NonInd
 		final DOMElement _syncedNode = (DOMElement) getProperty(sharedComponent);
 		if (_syncedNode != null && EditMode.DEPLOYMENT.equals(editMode)) {
 
-			final String name = _syncedNode.getProperty(AbstractNode.name);
-
 			out.append("<structr:component src=\"");
-			out.append(name != null ? name : _syncedNode.getUuid());
+
+			final String _name = _syncedNode.getProperty(AbstractNode.name);
+			out.append(_name != null ? _name.concat("-").concat(_syncedNode.getUuid()) : _syncedNode.getUuid());
+
 			out.append("\"");
 
 			renderSharedComponentConfiguration(out, editMode);
