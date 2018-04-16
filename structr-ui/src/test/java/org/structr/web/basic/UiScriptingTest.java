@@ -27,7 +27,6 @@ import java.io.OutputStreamWriter;
 import java.io.PrintWriter;
 import java.io.UnsupportedEncodingException;
 import java.nio.charset.Charset;
-import java.security.Principal;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Enumeration;
@@ -51,12 +50,13 @@ import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
 import javax.servlet.http.HttpUpgradeHandler;
 import javax.servlet.http.Part;
-import static junit.framework.TestCase.assertTrue;
-import static junit.framework.TestCase.fail;
 import org.apache.commons.lang.StringUtils;
 import org.hamcrest.Matchers;
 import static org.hamcrest.Matchers.equalTo;
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.fail;
 import org.junit.Test;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -66,6 +66,7 @@ import org.structr.common.error.FrameworkException;
 import org.structr.core.app.App;
 import org.structr.core.app.StructrApp;
 import org.structr.core.entity.AbstractNode;
+import org.structr.core.entity.Group;
 import org.structr.core.entity.SchemaNode;
 import org.structr.core.graph.NodeAttribute;
 import org.structr.core.graph.NodeInterface;
@@ -646,7 +647,7 @@ public class UiScriptingTest extends StructrUiTest {
 				new NodeAttribute<>(User.isAdmin, true)
 			);
 
-			// create admin user
+			// create test user
 			tester = createTestNode(User.class,
 				new NodeAttribute<>(User.name, "tester"),
 				new NodeAttribute<>(User.password, "test")
@@ -690,6 +691,68 @@ public class UiScriptingTest extends StructrUiTest {
 
 			assertEquals("Result is of invalid type",              ArrayList.class, result.getClass());
 			assertEquals("Privileged script should not see admin", 1, ((List)result).size());
+
+			tx.success();
+
+		} catch (FrameworkException fex) {
+
+			fex.printStackTrace();
+			fail("Unexpected exception.");
+		}
+	}
+
+	@Test
+	public void testGroupFunctions() {
+
+		Group group = null;
+		User tester = null;
+
+		try (final Tx tx = app.tx()) {
+
+			// create test user
+			tester = createTestNode(User.class,
+				new NodeAttribute<>(User.name, "tester"),
+				new NodeAttribute<>(User.password, "test")
+			);
+
+			// create test group
+			group = createTestNode(Group.class, new NodeAttribute<>(Group.name, "test"));
+
+			tx.success();
+
+		} catch (FrameworkException fex) {
+
+			fex.printStackTrace();
+			fail("Unexpected exception.");
+		}
+
+		final RenderContext renderContext = new RenderContext(securityContext, new RequestMockUp(), new ResponseMockUp(), RenderContext.EditMode.NONE);
+
+		try (final Tx tx = app.tx()) {
+
+			// check that the user is not in the group at first
+			assertFalse("User should not be in the test group before testing", group.getProperty(Group.members).contains(tester));
+
+			// check that is_in_group returns the correct result
+			assertEquals("Function is_in_group should return false.", false, Scripting.evaluate(renderContext, null, "${is_in_group(first(find('Group')), first(find('User')))}", "test"));
+
+			// add user to group
+			Scripting.evaluate(renderContext, null, "${add_to_group(first(find('Group')), first(find('User')))}", "test");
+
+			// check that the user is in the group after the call to add_to_group
+			assertTrue("User should be in the test group now", group.getProperty(Group.members).contains(tester));
+
+			// check that is_in_group returns the correct result
+			assertEquals("Function is_in_group should return true.", true, Scripting.evaluate(renderContext, null, "${is_in_group(first(find('Group')), first(find('User')))}", "test"));
+
+			// remove user from group
+			Scripting.evaluate(renderContext, null, "${remove_from_group(first(find('Group')), first(find('User')))}", "test");
+
+			// check that the user is not in the group any more after the call to remove_from_group
+			assertFalse("User should not be in the test group before testing", group.getProperty(Group.members).contains(tester));
+
+			// check that is_in_group returns the correct result
+			assertEquals("Function is_in_group should return false.", false, Scripting.evaluate(renderContext, null, "${is_in_group(first(find('Group')), first(find('User')))}", "test"));
 
 			tx.success();
 
@@ -806,7 +869,7 @@ public class UiScriptingTest extends StructrUiTest {
 		}
 
 		@Override
-		public Principal getUserPrincipal() {
+		public java.security.Principal getUserPrincipal() {
 			throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
 		}
 
