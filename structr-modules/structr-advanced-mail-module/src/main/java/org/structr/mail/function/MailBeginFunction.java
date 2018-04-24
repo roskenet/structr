@@ -24,7 +24,7 @@ import org.structr.common.AdvancedMailContainer;
 import org.structr.common.error.FrameworkException;
 import org.structr.schema.action.ActionContext;
 import org.structr.schema.action.Function;
-import org.structr.web.entity.File;
+import org.structr.web.entity.FileBase;
 
 
 public class MailBeginFunction extends Function<Object, Object> {
@@ -52,9 +52,9 @@ public class MailBeginFunction extends Function<Object, Object> {
 
 			amc.init(from, fromName, subject, htmlContent, textContent);
 
-			if (sources.length == 6 && sources[5] instanceof List && ((List) sources[5]).size() > 0 && ((List) sources[5]).get(0) instanceof File) {
+			if (sources.length == 6 && sources[5] instanceof List && ((List) sources[5]).size() > 0 && ((List) sources[5]).get(0) instanceof FileBase) {
 
-				for (File fileNode : (List<File>) sources[5]) {
+				for (FileBase fileNode : (List<FileBase>) sources[5]) {
 
 					try {
 

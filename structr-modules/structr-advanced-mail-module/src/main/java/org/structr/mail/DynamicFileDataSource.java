@@ -27,7 +27,7 @@ import javax.activation.DataSource;
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang3.StringUtils;
 import static org.structr.core.GraphObject.logger;
-import org.structr.web.entity.File;
+import org.structr.web.entity.FileBase;
 
 
 /**
@@ -42,7 +42,7 @@ public class DynamicFileDataSource implements DataSource {
 	private String fileContent;
 	private String encoding = "UTF-8";
 
-	public DynamicFileDataSource (final File fileNode) {
+	public DynamicFileDataSource (final FileBase fileNode) {
 
 		contentType = fileNode.getContentType();
 		fileName    = fileNode.getName();

@@ -26,7 +26,7 @@ import org.structr.common.error.FrameworkException;
 import org.structr.mail.DynamicFileDataSource;
 import org.structr.schema.action.ActionContext;
 import org.structr.schema.action.Function;
-import org.structr.web.entity.File;
+import org.structr.web.entity.FileBase;
 
 
 public class MailAddAttachmentFunction extends Function<Object, Object> {
@@ -41,9 +41,9 @@ public class MailAddAttachmentFunction extends Function<Object, Object> {
 
 			final AdvancedMailContainer amc = ctx.getAdvancedMailContainer();
 
-			if (sources[0] instanceof File) {
+			if (sources[0] instanceof FileBase) {
 
-				final File fileNode = (File)sources[0];
+				final FileBase fileNode = (FileBase)sources[0];
 				final String attachmentName = (sources.length == 2) ? sources[1].toString() : fileNode.getName();
 
 				try {
@@ -79,18 +79,18 @@ public class MailAddAttachmentFunction extends Function<Object, Object> {
 		return "mail_add_attachment()";
 	}
 
-	public static void addAttachment(final AdvancedMailContainer amc, final File fileNode) throws MalformedURLException {
+	public static void addAttachment(final AdvancedMailContainer amc, final FileBase fileNode) throws MalformedURLException {
 		addAttachment(amc, fileNode, fileNode.getName());
 	}
 
-	public static void addAttachment(final AdvancedMailContainer amc, final File fileNode, final String attachmentName) throws MalformedURLException {
+	public static void addAttachment(final AdvancedMailContainer amc, final FileBase fileNode, final String attachmentName) throws MalformedURLException {
 
 		final DynamicMailAttachment attachment = new DynamicMailAttachment();
 		attachment.setURL(fileNode.getFileOnDisk().toURI().toURL());
 		attachment.setName(attachmentName);
 		attachment.setDisposition(EmailAttachment.ATTACHMENT);
 
-		if (fileNode.isTemplate()) {
+		if(fileNode.getProperty(FileBase.isTemplate) == true) {
 
 			attachment.setIsDynamic(true);
 			attachment.setDataSource(new DynamicFileDataSource(fileNode));
