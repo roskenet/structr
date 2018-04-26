@@ -22,7 +22,6 @@ import org.structr.common.error.FrameworkException;
 import org.structr.schema.action.ActionContext;
 import org.structr.schema.action.Function;
 
-
 public class MailAddBccFunction extends Function<Object, Object> {
 
 	public final String ERROR_MESSAGE    = "Usage: ${mail_add_bcc(bccAddress[, bccName])}";
@@ -57,5 +56,4 @@ public class MailAddBccFunction extends Function<Object, Object> {
 	public String getName() {
 		return "mail_add_bcc()";
 	}
-
 }

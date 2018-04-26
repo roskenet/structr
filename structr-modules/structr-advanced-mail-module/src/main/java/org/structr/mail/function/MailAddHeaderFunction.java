@@ -22,7 +22,6 @@ import org.structr.common.error.FrameworkException;
 import org.structr.schema.action.ActionContext;
 import org.structr.schema.action.Function;
 
-
 public class MailAddHeaderFunction extends Function<Object, Object> {
 
 	public final String ERROR_MESSAGE    = "Usage: ${mail_add_header(name, value)}";
@@ -36,7 +35,7 @@ public class MailAddHeaderFunction extends Function<Object, Object> {
 			final String name  = sources[0].toString();
 			final String value = sources[1].toString();
 
-			ctx.getAdvancedMailContainer().addHeader(name, value);
+			ctx.getAdvancedMailContainer().addCustomHeader(name, value);
 
 		}
 
@@ -57,5 +56,4 @@ public class MailAddHeaderFunction extends Function<Object, Object> {
 	public String getName() {
 		return "mail_add_header()";
 	}
-
 }

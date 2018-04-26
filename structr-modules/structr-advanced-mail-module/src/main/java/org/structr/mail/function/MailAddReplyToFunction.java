@@ -22,7 +22,6 @@ import org.structr.common.error.FrameworkException;
 import org.structr.schema.action.ActionContext;
 import org.structr.schema.action.Function;
 
-
 public class MailAddReplyToFunction extends Function<Object, Object> {
 
 	public final String ERROR_MESSAGE    = "Usage: ${mail_add_reply_to(replyToAddress[, replyToName])}";
@@ -38,10 +37,10 @@ public class MailAddReplyToFunction extends Function<Object, Object> {
 			final String name    = (sources.length == 2) ? sources[1].toString() : null;
 
 			ctx.getAdvancedMailContainer().addReplyTo(address, name);
-
 		}
 
 		return "";
+
 	}
 
 	@Override
@@ -58,5 +57,4 @@ public class MailAddReplyToFunction extends Function<Object, Object> {
 	public String getName() {
 		return "mail_add_reply_to()";
 	}
-
 }

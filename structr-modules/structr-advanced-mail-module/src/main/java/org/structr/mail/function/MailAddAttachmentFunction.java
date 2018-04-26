@@ -28,7 +28,6 @@ import org.structr.schema.action.ActionContext;
 import org.structr.schema.action.Function;
 import org.structr.web.entity.FileBase;
 
-
 public class MailAddAttachmentFunction extends Function<Object, Object> {
 
 	public final String ERROR_MESSAGE    = "Usage: ${mail_add_attachment(file[, name])}";

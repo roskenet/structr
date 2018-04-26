@@ -22,23 +22,19 @@ import org.structr.common.error.FrameworkException;
 import org.structr.schema.action.ActionContext;
 import org.structr.schema.action.Function;
 
-public class MailAddCcFunction extends Function<Object, Object> {
+public class MailSetHtmlContentFunction extends Function<Object, Object> {
 
-	public final String ERROR_MESSAGE    = "Usage: ${mail_add_cc(ccAddress[, bccName])}";
-	public final String ERROR_MESSAGE_JS = "Usage: ${Structr.mail_add_cc(ccAddress[, bccName])}";
+	public final String ERROR_MESSAGE    = "Usage: ${mail_set_html_content(htmlContent)}";
+	public final String ERROR_MESSAGE_JS = "Usage: ${Structr.mail_set_html_content(htmlContent)}";
 
 	@Override
 	public Object apply(ActionContext ctx, Object caller, Object[] sources) throws FrameworkException {
 
 		try {
 
-			if (arrayHasMinLengthAndMaxLengthAndAllElementsNotNull(sources, 1, 2)) {
+			if (arrayHasLengthAndAllElementsNotNull(sources, 1)) {
 
-				final String address = sources[0].toString();
-				final String name    = (sources.length == 2) ? sources[1].toString() : null;
-
-				ctx.getAdvancedMailContainer().addCc(address, name);
-
+				ctx.getAdvancedMailContainer().setHtmlContent(sources[0].toString());
 			}
 
 			return "";
@@ -62,6 +58,6 @@ public class MailAddCcFunction extends Function<Object, Object> {
 
 	@Override
 	public String getName() {
-		return "mail_add_cc()";
+		return "mail_set_html_content(htmlContent)";
 	}
 }

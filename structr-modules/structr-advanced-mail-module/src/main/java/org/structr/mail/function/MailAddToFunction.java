@@ -22,12 +22,10 @@ import org.structr.common.error.FrameworkException;
 import org.structr.schema.action.ActionContext;
 import org.structr.schema.action.Function;
 
-
 public class MailAddToFunction extends Function<Object, Object> {
 
 	public final String ERROR_MESSAGE    = "Usage: ${mail_add_to(toAddress[, toName])}";
 	public final String ERROR_MESSAGE_JS = "Usage: ${Structr.mail_add_to(toAddress[, toName])}";
-
 
 	@Override
 	public Object apply(ActionContext ctx, Object caller, Object[] sources) throws FrameworkException {
@@ -38,10 +36,10 @@ public class MailAddToFunction extends Function<Object, Object> {
 			final String name    = (sources.length == 2) ? sources[1].toString() : null;
 
 			ctx.getAdvancedMailContainer().addTo(address, name);
-
 		}
 
 		return "";
+
 	}
 
 	@Override
