@@ -42,7 +42,7 @@ public class ScheduleFunction extends UiFunction {
 
 		if (arrayHasLengthAndAllElementsNotNull(sources, 1)) {
 
-			final ScriptJob job = new ScriptJob(ctx.getSecurityContext().getCachedUser(), Collections.EMPTY_MAP, sources[0]);
+			final ScriptJob job = new ScriptJob(ctx.getSecurityContext().getCachedUser(), Collections.EMPTY_MAP, sources[0], ctx.getSecurityContext().getContextStore());
 
 			try {
 

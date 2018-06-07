@@ -539,7 +539,7 @@ public class FileBase extends AbstractFile implements Indexable, Linkable, JavaS
 	@Export
 	public void doCSVImport(final Map<String, Object> parameters) throws FrameworkException {
 
-		CSVFileImportJob job = new CSVFileImportJob(this, securityContext.getUser(false), parameters);
+		CSVFileImportJob job = new CSVFileImportJob(this, securityContext.getUser(false), parameters, securityContext.getContextStore());
 		JobQueueManager.getInstance().addJob(job);
 
 	}
@@ -569,7 +569,7 @@ public class FileBase extends AbstractFile implements Indexable, Linkable, JavaS
 	@Export
 	public void doXMLImport(final Map<String, Object> config) throws FrameworkException {
 
-		XMLFileImportJob job = new XMLFileImportJob(this, securityContext.getUser(false), config);
+		XMLFileImportJob job = new XMLFileImportJob(this, securityContext.getUser(false), config, securityContext.getContextStore());
 		JobQueueManager.getInstance().addJob(job);
 
 	}
