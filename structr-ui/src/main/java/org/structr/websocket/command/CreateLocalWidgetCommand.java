@@ -39,7 +39,7 @@ import org.structr.websocket.message.WebSocketMessage;
 public class CreateLocalWidgetCommand extends AbstractCommand {
 
 	private static final Logger logger     = LoggerFactory.getLogger(CreateLocalWidgetCommand.class.getName());
-	
+
 	static {
 
 		StructrWebSocket.addCommand(CreateLocalWidgetCommand.class);
@@ -47,6 +47,8 @@ public class CreateLocalWidgetCommand extends AbstractCommand {
 
 	@Override
 	public void processMessage(final WebSocketMessage webSocketData) {
+
+		setDoTransactionNotifications(true);
 
 		final App app                      = StructrApp.getInstance(getWebSocket().getSecurityContext());
 		final String id	                   = webSocketData.getId();
@@ -73,9 +75,9 @@ public class CreateLocalWidgetCommand extends AbstractCommand {
 			return;
 
 		}
-		
+
 		try {
-			
+
 			// convertFromInput
 			PropertyMap properties = new PropertyMap();
 
@@ -84,7 +86,7 @@ public class CreateLocalWidgetCommand extends AbstractCommand {
 			properties.put(Widget.source, source);
 
 			final Widget widget = app.create(Widget.class, properties);
-			
+
 			TransactionCommand.registerNodeCallback(widget, callback);
 
 		} catch (Throwable t) {

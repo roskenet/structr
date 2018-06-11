@@ -47,6 +47,8 @@ public class InsertCommand extends AbstractCommand {
 	@Override
 	public void processMessage(final WebSocketMessage webSocketData) {
 
+		setDoTransactionNotifications(true);
+
 		final SecurityContext securityContext = getWebSocket().getSecurityContext();
 		final App app                         = StructrApp.getInstance(securityContext);
 
@@ -65,7 +67,7 @@ public class InsertCommand extends AbstractCommand {
 				PropertyMap nodeProperties = PropertyMap.inputTypeToJavaType(securityContext, properties);
 
 				nodeToInsert = app.create(DOMNode.class, nodeProperties);
-				
+
 			} catch (FrameworkException fex) {
 
 				logger.warn("Could not create node.", fex);
@@ -79,7 +81,7 @@ public class InsertCommand extends AbstractCommand {
 
 					PropertyMap relProperties = PropertyMap.inputTypeToJavaType(securityContext, relData);
 					app.create(parentNode, nodeToInsert, DOMChildren.class, relProperties);
-					
+
 				} catch (FrameworkException t) {
 
 					getWebSocket().send(MessageBuilder.status().code(400).message(t.getMessage()).build(), true);

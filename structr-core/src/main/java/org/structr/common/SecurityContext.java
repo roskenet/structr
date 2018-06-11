@@ -58,7 +58,7 @@ public class SecurityContext {
 	private static final Map<String, Long> resourceFlags = new ConcurrentHashMap<>();
 	private static final Pattern customViewPattern       = Pattern.compile(".*properties=([a-zA-Z_,]+)");
 	private boolean uuidWasSetManually                   = false;
-	private boolean doTransactionNotifications           = true;
+	private boolean doTransactionNotifications           = false;
 	private boolean modifyAccessTime                     = true;
 	private boolean ignoreResultCount                    = false;
 	private boolean ensureCardinality                    = true;

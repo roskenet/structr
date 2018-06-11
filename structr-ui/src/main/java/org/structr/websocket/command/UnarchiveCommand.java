@@ -73,6 +73,8 @@ public class UnarchiveCommand extends AbstractCommand {
 	@Override
 	public void processMessage(final WebSocketMessage webSocketData) {
 
+		setDoTransactionNotifications(true);
+
 		final Set<String> supportedByArchiveStreamFactory = new HashSet<>(Arrays.asList(new String[]{
 			ArchiveStreamFactory.AR,
 			ArchiveStreamFactory.ARJ,
@@ -150,7 +152,7 @@ public class UnarchiveCommand extends AbstractCommand {
 
 		final String fileName = file.getName();
 
-		try (final Tx tx = app.tx()) {
+		try (final Tx tx = app.tx(true, true, true)) {
 
 			// search for existing parent folder
 			existingParentFolder = app.get(Folder.class, parentFolderId);

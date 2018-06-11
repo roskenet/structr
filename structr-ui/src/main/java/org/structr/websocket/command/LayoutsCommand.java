@@ -63,6 +63,8 @@ public class LayoutsCommand extends AbstractCommand {
 	@Override
 	public void processMessage(final WebSocketMessage webSocketData) {
 
+		setDoTransactionNotifications(true);
+
 		final Map<String, Object> data        = webSocketData.getNodeData();
 		final String mode                     = (String)data.get("mode");
 		final String name                     = (String)data.get("name");
@@ -169,9 +171,6 @@ public class LayoutsCommand extends AbstractCommand {
 		return "LAYOUTS";
 
 	}
-
-
-
 
 
 	// ----- private methods -----

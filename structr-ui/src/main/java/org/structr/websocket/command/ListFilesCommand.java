@@ -44,7 +44,7 @@ import org.structr.websocket.message.WebSocketMessage;
 public class ListFilesCommand extends AbstractCommand {
 
 	private static final Logger logger = LoggerFactory.getLogger(ListFilesCommand.class.getName());
-	
+
 	static {
 
 		StructrWebSocket.addCommand(ListFilesCommand.class);
@@ -53,7 +53,8 @@ public class ListFilesCommand extends AbstractCommand {
 
 	@Override
 	public void processMessage(final WebSocketMessage webSocketData) {
-		
+
+		setDoTransactionNotifications(true);
 
 		final SecurityContext securityContext  = getWebSocket().getSecurityContext();
 		final String rawType                   = (String) webSocketData.getNodeData().get("type");
@@ -64,13 +65,13 @@ public class ListFilesCommand extends AbstractCommand {
 		final int page                         = webSocketData.getPage();
 		final PropertyKey sortProperty         = StructrApp.getConfiguration().getPropertyKeyForJSONName(type, sortKey);
 		final Query query                      = StructrApp.getInstance(securityContext).nodeQuery(type).includeDeletedAndHidden().sort(sortProperty).order("desc".equals(sortOrder));
-		
+
 		// for image lists, suppress thumbnails
 		if (type.equals(Image.class)) {
-			
+
 			query.and(Image.isThumbnail, false);
 		}
-		
+
 
 		try {
 
@@ -96,14 +97,14 @@ public class ListFilesCommand extends AbstractCommand {
 
 			// save raw result count
 			int resultCountBeforePaging = filteredResults.size();
-			
+
 			// set full result list
 			webSocketData.setResult(PagingHelper.subList(filteredResults, pageSize, page));
 			webSocketData.setRawResultCount(resultCountBeforePaging);
 
 			// send only over local connection
 			getWebSocket().send(webSocketData, true);
-			
+
 		} catch (FrameworkException fex) {
 
 			logger.warn("", fex);

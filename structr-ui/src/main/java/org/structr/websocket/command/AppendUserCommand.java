@@ -34,7 +34,7 @@ import org.structr.websocket.message.WebSocketMessage;
  *
  */
 public class AppendUserCommand extends AbstractCommand {
-		
+
 	private static final Logger logger     = LoggerFactory.getLogger(AppendUserCommand.class.getName());
 
 	static {
@@ -44,6 +44,8 @@ public class AppendUserCommand extends AbstractCommand {
 
 	@Override
 	public void processMessage(final WebSocketMessage webSocketData) {
+
+		setDoTransactionNotifications(true);
 
 		String id                    = webSocketData.getId();
 		Map<String, Object> nodeData = webSocketData.getNodeData();
@@ -81,7 +83,7 @@ public class AppendUserCommand extends AbstractCommand {
 		if (parentNode instanceof Group) {
 
 			Group group = (Group) parentNode;
-			
+
 			Principal user = (Principal) getNode(id);
 
 			if (user != null) {
@@ -92,7 +94,7 @@ public class AppendUserCommand extends AbstractCommand {
 					getWebSocket().send(MessageBuilder.status().code(422).message("Cannot append file").build(), true);
 				}
 			}
-			
+
 
 		} else {
 

@@ -53,11 +53,13 @@ public class DeleteUnattachedNodesCommand extends AbstractCommand {
 	@Override
 	public void processMessage(final WebSocketMessage webSocketData) throws FrameworkException {
 
+		setDoTransactionNotifications(true);
+
 		final SecurityContext securityContext = getWebSocket().getSecurityContext();
 		final App app = StructrApp.getInstance(securityContext);
 
 		final List<AbstractNode> filteredResults = new LinkedList<>();
-		
+
 		try (final Tx tx = app.tx(true, false, false)) {
 
 			// Get all top nodes, use method from list command
@@ -68,7 +70,7 @@ public class DeleteUnattachedNodesCommand extends AbstractCommand {
 				filteredResults.add(topNode);
 				filteredResults.addAll(DOMNode.getAllChildNodes((DOMNode) topNode));
 			}
-			
+
 			for (final AbstractNode node : filteredResults) {
 				app.delete(node);
 			}

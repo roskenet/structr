@@ -52,6 +52,8 @@ public class PatchCommand extends AbstractCommand {
 	@Override
 	public void processMessage(final WebSocketMessage webSocketData) {
 
+		setDoTransactionNotifications(true);
+
 		final AbstractNode node        = getNode(webSocketData.getId());
 		Map<String, Object> properties = webSocketData.getNodeData();
 		String patch                   = (String) properties.get("patch");

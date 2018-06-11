@@ -50,6 +50,8 @@ public class FindDuplicateFilesCommand extends AbstractCommand {
 	@Override
 	public void processMessage(final WebSocketMessage webSocketData) {
 
+		setDoTransactionNotifications(true);
+
 		final SecurityContext securityContext = getWebSocket().getSecurityContext();
 
 		final Query query = StructrApp.getInstance(securityContext).nodeQuery(AbstractFile.class).sort(AbstractFile.path);

@@ -45,10 +45,12 @@ public class ImageConverterCommand extends AbstractCommand {
 	@Override
 	public void processMessage(final WebSocketMessage webSocketData) {
 
+		setDoTransactionNotifications(true);
+
 		final String originalImageId          = webSocketData.getId();
 		final Map<String, Object> properties  = webSocketData.getNodeData();
 		final Image originalImage             = (Image) getNode(originalImageId);
-		
+
 		final String format = (String) properties.get("format");
 		final int width     = (int) (long) properties.get("width");
 		final int height    = (int) (long) properties.get("height");
@@ -58,7 +60,7 @@ public class ImageConverterCommand extends AbstractCommand {
 		if (originalImage != null) {
 
 			final Thumbnail thumbnailData = ImageHelper.createCroppedImage(originalImage, width, height, offsetX, offsetY, format);
-			
+
 			if (thumbnailData != null) {
 
 				final Integer tnWidth  = thumbnailData.getWidth();
@@ -72,7 +74,7 @@ public class ImageConverterCommand extends AbstractCommand {
 
 					// create image variant
 					final Image imageVariant = ImageHelper.createImageNode(originalImage.getSecurityContext(), data, "image/" + Thumbnail.Format.png, Image.class, thumbnailName, false);
-					
+
 					// store in same parent folder
 					imageVariant.setProperty(Image.parent, originalImage.getProperty(Image.parent));
 
@@ -87,7 +89,7 @@ public class ImageConverterCommand extends AbstractCommand {
 				getWebSocket().send(MessageBuilder.status().code(400).message("Could not create converted image for " + originalImageId).build(), true);
 
 			}
-			
+
 		} else {
 
 			getWebSocket().send(MessageBuilder.status().code(400).message("No id of the original image given").build(), true);
