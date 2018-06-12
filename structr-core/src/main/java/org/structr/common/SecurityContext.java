@@ -119,6 +119,10 @@ public class SecurityContext {
 				this.doTransactionNotifications = false;
 			}
 
+			if ("enabled".equals(request.getHeader("Structr-Websocket-Broadcast"))) {
+				this.doTransactionNotifications = true;
+			}
+
 			if (request.getParameter("ignoreResultCount") != null) {
 				this.ignoreResultCount = true;
 			}
