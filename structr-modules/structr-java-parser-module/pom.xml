@@ -4,7 +4,7 @@
 	<parent>
 		<groupId>org.structr</groupId>
 		<artifactId>structr-modules</artifactId>
-		<version>2.3.9-SNAPSHOT</version>
+		<version>2.3.10-SNAPSHOT</version>
 	</parent>
 	<artifactId>structr-java-parser-module</artifactId>
 	<packaging>jar</packaging>
@@ -35,7 +35,7 @@
 			<groupId>com.github.javaparser</groupId>
 			<artifactId>java-symbol-solver-core</artifactId>
 			<version>0.6.1</version>
-		</dependency>		
+		</dependency>
 		<dependency>
 			<groupId>com.jayway.restassured</groupId>
 			<artifactId>rest-assured</artifactId>

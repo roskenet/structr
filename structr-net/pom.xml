@@ -4,14 +4,14 @@
 	<name>Structr Net</name>
 	<groupId>org.structr</groupId>
 	<artifactId>structr-net</artifactId>
-	<version>2.3.9-SNAPSHOT</version>
+	<version>2.3.10-SNAPSHOT</version>
 
 	<parent>
 		<groupId>org.structr</groupId>
 		<artifactId>structr</artifactId>
-		<version>2.3.9-SNAPSHOT</version>
+		<version>2.3.10-SNAPSHOT</version>
 	</parent>
-		
+
 	<packaging>jar</packaging>
 	<properties>
 		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
